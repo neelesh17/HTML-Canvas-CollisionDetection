@@ -37,7 +37,7 @@ class Particle {
     }
     this.radius = radius;
     this.color = color;
-    this.mass = 1;
+    this.mass = 2;
     this.opacity = 0;
   }
 
@@ -70,12 +70,18 @@ class Particle {
     if(this.x - this.radius <= 0 || this.x + this.radius >= innerWidth){
       this.velocity.x = -this.velocity.x;
     }
-    if(this.y - this.radius <= 0 || this.y + this.radius >= innerHeight){
+    if(this.y - this.radius <= 0 || this.y + this.radius >= innerHeight ){
+      this.velocity.y = -this.velocity.y;
+    }
+    if(this.x + this.radius >= canvas.width/2 - 400 && this.x - this.radius <= canvas.width/2 + 400  && this.y + this.radius >= canvas.height/2 - 120 && this.y - this.radius <= canvas.height/2 + 120){ 
+      this.velocity.x = -this.velocity.x;
+    }
+    if(this.y + this.radius >= canvas.height/2 - 120 && this.y - this.radius <= canvas.height/2 + 120 && this.x + this.radius >= canvas.width/2 - 400 && this.x - this.radius <= canvas.width/2 + 400){
       this.velocity.y = -this.velocity.y;
     }
 
     //mouse collision detection
-    if(distance(mouse.x,mouse.y, this.x,this.y) <= 150 && this.opacity < 0.4){
+    if(distance(mouse.x,mouse.y, this.x,this.y) <= 150 && this.opacity < 0.8){
       this.opacity += 0.02;
     } else if (this.opacity > 0){
       this.opacity -= 0.02;
@@ -98,16 +104,49 @@ function init() {
     const color = utils.randomColor(colors);
     if(i != 0){
       for(let j=0;j<particles.length;j++) {
-        if(distance(x,y, particles[j].x,particles[j].y) - (radius * 2) <= 0){
+        if(distance(x,y, particles[j].x,particles[j].y) - (radius * 2) <= 0 || (x + radius >= canvas.width/2 - 400 && x - radius <= canvas.width/2 + 400) || (y + radius >= canvas.height/2 - 200 && y - radius <= canvas.height/2 + 200)){
           x = utils.randomIntFromRange(radius, canvas.width - radius);
           y = utils.randomIntFromRange(radius, canvas.height - radius);
           j = -1;
         }
       }
+    } else{
+      while((x + radius >= canvas.width/2 - 400 && x - radius <= canvas.width/2 + 400) || (y + radius >= canvas.height/2 - 200 && y - radius <= canvas.height/2 + 200)){
+        x = utils.randomIntFromRange(radius, canvas.width - radius);
+        y = utils.randomIntFromRange(radius, canvas.height - radius);
+      }
     }
     particles.push(new Particle(x, y, radius, color));
   }
 }
+
+//centered text and box
+function text() {
+  c.beginPath();
+  c.moveTo(canvas.width/2 - 400, canvas.height/2 - 120);
+  c.lineTo(canvas.width/2 - 400, canvas.height/2 + 120);
+  c.lineTo(canvas.width/2 + 400, canvas.height/2 + 120);
+  c.lineTo(canvas.width/2 + 400, canvas.height/2 - 120);
+  c.lineTo(canvas.width/2 - 400, canvas.height/2 - 120);
+  c.fillStyle = "rgba(0,0,0,0.5)";
+  c.fill();
+  c.font = "bold 60px Balsamiq Sans";
+  c.fillStyle = "white";
+  c.textAlign = "center";
+  c.textBaseline = "ideographic";
+  let ctext = "COLLISION DETECTION".split("").join(String.fromCharCode(8202))
+  c.fillText(ctext, canvas.width/2, canvas.height/2);
+  c.font = "40px Crimson Text";
+  c.fillText("Jul 25, 2020", canvas.width/2, canvas.height/2 + 100);
+  c.beginPath();
+  c.moveTo(canvas.width/2 - 100 , canvas.height/2 + 20);
+  c.lineTo(canvas.width/2 + 100, canvas.height/2 + 20);
+  c.strokeStyle = "rgba(0, 0, 0, 1)";
+  c.lineWidth = 2.5;
+  c.stroke();
+  c.closePath();
+}
+
 
 // Animation Loop
 function animate() {
@@ -116,6 +155,7 @@ function animate() {
   particles.forEach(particle => {
    particle.update(particles);
   });
+  text();
 }
 
 init();
